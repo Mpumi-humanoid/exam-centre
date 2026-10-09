@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
-import { describeAuthError } from '../auth/profile';
 
 export default function Login({ onLogin }) {
-  const { signIn, error: authError } = useAuth();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,7 +18,11 @@ export default function Login({ onLogin }) {
       onLogin(profile);
     } catch (signInError) {
       console.error('Sign in failed:', signInError);
-      setError(describeAuthError(signInError));
+      setError(signInError.message?.includes('Supabase is not configured')
+        ? 'The sign-in service is not configured yet. Add your Supabase project URL and anon key.'
+        : signInError.code === 'PGRST116'
+          ? 'Your account does not have a student or lecturer profile yet. Contact an administrator.'
+        : 'We could not sign you in. Check your email and password, then try again.');
     } finally {
       setLoading(false);
     }
@@ -52,7 +55,7 @@ export default function Login({ onLogin }) {
             <input id="password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required placeholder="Enter your password" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-700" />
           </div>
 
-          {(error || authError) && <div className="text-sm text-red-700 bg-red-50 p-3 rounded" role="alert">{error || authError}</div>}
+          {error && <div className="text-sm text-red-700 bg-red-50 p-3 rounded" role="alert">{error}</div>}
 
           <button type="submit" disabled={loading} className="w-full bg-emerald-900 text-white py-2 px-4 rounded-md hover:bg-emerald-950 disabled:opacity-50">
             {loading ? 'Signing in…' : 'Sign in'}

@@ -15,7 +15,6 @@ function formatDate(value) {
 export default function Results() {
   const { user } = useAuth();
   const [filter, setFilter] = useState('All results');
-  const [moduleCodeQuery, setModuleCodeQuery] = useState('');
   const loadData = useCallback(() => fetchStudentResults(user.id), [user.id]);
   const { data: results, loading, error, refresh } = useRemoteData(loadData);
 
@@ -24,7 +23,7 @@ export default function Results() {
 
   const shownResults = results.filter((result) => (
     filter === 'All results' || (filter === 'Module results' && result.type === 'module') || (filter === 'Exam results' && result.type === 'exam')
-  )).filter((result) => result.code.toLowerCase().includes(moduleCodeQuery.trim().toLowerCase()));
+  ));
 
   return (
     <div>
@@ -37,20 +36,11 @@ export default function Results() {
         <span><strong>{results.length} results released</strong><span className="ml-2 text-emerald-800">· Unreleased results are hidden until published.</span></span>
       </div>
 
-      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-        <div className="flex flex-wrap gap-2" role="tablist" aria-label="Filter results by type">
-          {FILTERS.map((item) => <button key={item} type="button" role="tab" aria-selected={filter === item} onClick={() => setFilter(item)} className={`rounded-lg px-3 py-2 text-sm font-medium ${filter === item ? 'bg-emerald-900 text-white' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}>{item}</button>)}
-        </div>
-        <label className="text-sm font-medium text-slate-700">
-          Search module code
-          <input value={moduleCodeQuery} onChange={(event) => setModuleCodeQuery(event.target.value)} placeholder="e.g. CMPG211" className="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-normal focus:outline-none focus:ring-2 focus:ring-emerald-700 sm:w-56" />
-        </label>
+      <div className="mb-4 flex flex-wrap gap-2" role="tablist" aria-label="Filter results by type">
+        {FILTERS.map((item) => <button key={item} type="button" role="tab" aria-selected={filter === item} onClick={() => setFilter(item)} className={`rounded-lg px-3 py-2 text-sm font-medium ${filter === item ? 'bg-emerald-900 text-white' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'}`}>{item}</button>)}
       </div>
 
-      {shownResults.length === 0 ? <EmptyState
-        title={moduleCodeQuery.trim() ? 'No results match that module code' : filter === 'All results' ? 'No results released yet' : `No ${filter.toLowerCase()} found`}
-        description={moduleCodeQuery.trim() ? 'Check the module code and try again.' : 'Released module and exam results will appear here.'}
-      /> : (
+      {shownResults.length === 0 ? <EmptyState title="No results released yet" description="Released module and exam results will appear here." /> : (
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-left text-sm">

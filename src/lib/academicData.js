@@ -1,8 +1,10 @@
 import { getSupabase } from './supabaseClient';
-import { fetchProfileRow } from '../auth/profile';
 
 export async function fetchProfile(userId) {
-  return fetchProfileRow(getSupabase(), userId);
+  const client = getSupabase();
+  const { data, error } = await client.from('profiles').select('id, full_name, role, gender, institutional_id').eq('id', userId).single();
+  if (error) throw error;
+  return data;
 }
 
 export async function fetchStudentModules(userId) {
