@@ -29,7 +29,7 @@ export default function Login({ onLogin }) {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 font-sans">
       <div className="max-w-md w-full bg-white p-8 rounded-lg shadow">
         <div className="flex items-center gap-3 mb-6">
-          <div className="h-10 w-10 rounded-md bg-emerald-800 text-white flex items-center justify-center font-display text-lg font-semibold">E</div>
+          <img src="/logo1.jpg" alt="Exam Centre" className="h-12 w-12 object-contain" />
           <div className="flex flex-col leading-tight">
             <span className="font-semibold text-gray-900">Exam Centre</span>
             <span className="text-xs text-gray-500">secure sign in</span>

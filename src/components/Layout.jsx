@@ -59,7 +59,7 @@ export default function Layout({ role = 'student', children }) {
     <div className="min-h-screen bg-[#f7f8f5] font-sans text-slate-900">
       <aside className="fixed inset-y-0 left-0 z-10 hidden w-64 flex-col border-r border-slate-200 bg-white px-5 py-6 lg:flex">
         <a href={home} className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-800 text-lg font-bold text-white">E</span>
+          <img src="/logo1.jpg" className="flex h-12 w-12 object-contain" />
           <span>
             <span className="block font-semibold tracking-tight">Exam Centre</span>
             <span className="block text-xs text-slate-500">{subtitle}</span>
@@ -88,7 +88,7 @@ export default function Layout({ role = 'student', children }) {
         <header className="border-b border-slate-200 bg-white">
           <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-5 py-4 sm:px-8">
             <div className="flex items-center gap-2 lg:hidden">
-              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-800 font-bold text-white">E</span>
+              <img src="/logo1.jpg" alt="Exam Centre" className="h-12 w-12 object-contain" />
               <span className="font-semibold">Exam Centre</span>
             </div>
             <nav className="order-3 flex w-full gap-1 overflow-x-auto pb-1 lg:hidden" aria-label={`${role} navigation`}>
