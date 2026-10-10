@@ -24,14 +24,24 @@ const NAVIGATION = {
       ['/lecturer/profile', 'My profile'],
     ],
   },
+  admin: {
+    home: '/admin/users',
+    subtitle: 'Admin portal',
+    accountLabel: 'Administrator account',
+    links: [
+      ['/admin/users', 'Manage users'],
+    ],
+  },
 };
+
+const SECTION_LABELS = { student: 'Your learning', lecturer: 'Teaching', admin: 'Administration' };
 
 export default function Layout({ role = 'student', children }) {
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
   const [logoutError, setLogoutError] = useState('');
   const { home, subtitle, accountLabel, links } = NAVIGATION[role];
-  const displayName = profile?.full_name || user?.email || (role === 'student' ? 'Student' : 'Lecturer');
+  const displayName = profile?.full_name || user?.email || accountLabel;
   const initials = displayName.split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
 
   async function logout() {
@@ -55,7 +65,7 @@ export default function Layout({ role = 'student', children }) {
             <span className="block text-xs text-slate-500">{subtitle}</span>
           </span>
         </a>
-        <p className="mb-3 mt-12 px-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-slate-400">{role === 'student' ? 'Your learning' : 'Teaching'}</p>
+        <p className="mb-3 mt-12 px-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-slate-400">{SECTION_LABELS[role]}</p>
         <nav className="space-y-1" aria-label={`${role} navigation`}>
           {links.map(([to, label]) => (
             <NavLink

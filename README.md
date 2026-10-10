@@ -1,6 +1,6 @@
 # Exam Centre
 
-React and Supabase app with separate student and lecturer portals. Students can review modules, released module/exam results, feedback, and their profile. Lecturers can manage results and release assessments for modules assigned to them.
+React and Supabase app with separate student, lecturer and admin portals. Students can review modules, released module/exam results, feedback, and their profile. Lecturers can manage results and release assessments for modules assigned to them.
 
 ## Local setup
 
@@ -15,6 +15,23 @@ Requirements: Node.js and Docker Desktop. On Windows, WSL and the Virtual Machin
 Use `npm run db:reset` to reapply migrations and starter module/assessment seed data. It clears local database contents, so recreate test Auth users and assignments after a reset. Stop services with `npm run db:stop`.
 
 Build and lint with `npm run build` and `npm run lint`.
+
+## Admin portal
+
+Admins sign in at the normal login page and land on **Manage users** (`/admin/users`). From there they can search students and lecturers, open a profile (`/admin/users/:id`), and activate or deactivate the account. Deactivated users cannot sign in and the database hides their academic data.
+
+Setup:
+
+1. Apply the latest migration (`npm run db:reset` locally, or run `supabase/migrations/20261010120000_admin_user_management.sql` in the hosted project's SQL Editor).
+2. Create the admin user in Authentication → Users, then make them an admin:
+
+```sql
+insert into public.profiles (id, full_name, role)
+select id, 'Administrator', 'admin' from auth.users where email = 'admin@example.test'
+on conflict (id) do update set role = 'admin', full_name = excluded.full_name;
+```
+
+Admins can only change the status of students and lecturers, never their own account.
 
 ## Security and data behavior
 

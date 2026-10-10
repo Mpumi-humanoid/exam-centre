@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import AuthContext from './AuthContext';
 import { getSupabase, supabase } from '../lib/supabaseClient';
+import { ProfileError, describeAuthError, fetchProfileRow } from './profile';
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
@@ -14,12 +15,12 @@ export function AuthProvider({ children }) {
       return null;
     }
     const client = getSupabase();
-    const { data, error: profileError } = await client
-      .from('profiles')
-      .select('id, full_name, role, gender, institutional_id')
-      .eq('id', user.id)
-      .single();
-    if (profileError) throw profileError;
+    const data = await fetchProfileRow(client, user.id);
+    if (data.is_active === false) {
+      // Deactivated by an admin: end the session and explain why.
+      await client.auth.signOut();
+      throw new ProfileError('ACCOUNT_INACTIVE', 'This account has been deactivated.');
+    }
     setProfile(data);
     return data;
   }, []);
@@ -44,9 +45,7 @@ export function AuthProvider({ children }) {
         if (active) {
           console.error('Could not load account profile:', profileError);
           setProfile(null);
-          setError(profileError?.code === 'PGRST116'
-            ? 'Your account profile is missing. Contact an administrator.'
-            : 'Your account profile could not be loaded. Contact an administrator.');
+          setError(describeAuthError(profileError));
         }
       }).finally(() => {
         if (active) setLoading(false);
@@ -63,7 +62,9 @@ export function AuthProvider({ children }) {
     }).catch((sessionError) => {
       if (active) {
         console.error('Could not restore authentication session:', sessionError);
-        setError('Your session could not be restored. Please sign in again.');
+        setError(sessionError instanceof ProfileError
+          ? describeAuthError(sessionError)
+          : 'Your session could not be restored. Please sign in again.');
       }
     }).finally(() => {
       if (active) setLoading(false);

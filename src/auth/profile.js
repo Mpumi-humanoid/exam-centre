@@ -1,8 +1,8 @@
 // Helpers for loading the signed-in user's profile and explaining why it failed.
 
-const FULL_COLUMNS = 'id, full_name, role, gender, institutional_id';
+const FULL_COLUMNS = 'id, full_name, role, gender, institutional_id, is_active';
 const BASIC_COLUMNS = 'id, full_name, role';
-const SUPPORTED_ROLES = ['student', 'lecturer'];
+const SUPPORTED_ROLES = ['student', 'lecturer', 'admin'];
 
 export class ProfileError extends Error {
   constructor(code, message) {
@@ -19,7 +19,7 @@ export async function fetchProfileRow(client, userId) {
   // 42703 = "column does not exist": the profile_details migration has not been applied
   // to this database yet. Fall back to the basic columns so the user can still sign in.
   if (error?.code === '42703') {
-    console.warn('profiles.gender / profiles.institutional_id are missing. Run the latest Supabase migrations.');
+    console.warn('Some profiles columns (gender, institutional_id, is_active) are missing. Run the latest Supabase migrations.');
     ({ data, error } = await client.from('profiles').select(BASIC_COLUMNS).eq('id', userId).maybeSingle());
   }
 
@@ -48,10 +48,13 @@ export function describeAuthError(error) {
     return 'Your email or password is incorrect.';
   }
   if (code === 'PROFILE_MISSING' || code === 'PGRST116') {
-    return 'You signed in, but no student or lecturer profile is linked to this account yet. An administrator needs to add a row for you in the profiles table.';
+    return 'You signed in, but no profile is linked to this account yet. An administrator needs to add a row for you in the profiles table.';
   }
   if (code === 'UNSUPPORTED_ROLE') {
-    return 'Your account role is not "student" or "lecturer", so there is no portal for it. An administrator needs to correct your role.';
+    return 'Your account role is not recognised, so there is no portal for it. An administrator needs to correct your role.';
+  }
+  if (code === 'ACCOUNT_INACTIVE') {
+    return 'This account has been deactivated. Contact an administrator to have it reactivated.';
   }
   if (code === '42501' || error?.status === 401 || error?.status === 403) {
     return 'The database would not let you read your profile (a permissions/RLS problem). An administrator needs to check the profiles policies.';
